@@ -141,7 +141,7 @@ body{
 
 .secondSection{
     margin-top: 10px;
-    width: 1000px;
+    width: 100%;
     height: 100vh;
 }
 
@@ -189,8 +189,8 @@ body{
 
 .firstBoxContainer a, .secondBoxContainer div a{
     display: flex;
-    width: 100%;
-    height: 100%;
+    width: 105px;
+    height: 105px;
     justify-content: center;
     align-items: center;
     text-align: center;
