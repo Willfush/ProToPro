@@ -43,3 +43,23 @@ Preventivo.addEventListener('mouseover', () =>{
 Preventivo.addEventListener('mouseout', () =>{
     Preventivo.classList.remove('display-none')
 });
+
+
+
+let prevScrollPos = window.pageYOffset;
+
+window.addEventListener('scroll', function() {
+    let currentScrollPos = window.pageYOffset;
+    const navbar = document.getElementById('navbar');
+
+    console.log("Prev: " + prevScrollPos, "Current: " + currentScrollPos);
+
+    if (prevScrollPos > currentScrollPos) {
+        navbar.classList.remove('navBar-scroll');
+        console.log("Mostro la navbar");
+    } else {
+        navbar.classList.add('navBar-scroll');
+        console.log("Nascondo la navbar");
+    }
+    prevScrollPos = currentScrollPos;
+});

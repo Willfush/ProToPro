@@ -26,12 +26,28 @@ body{
     background:#101010;
 }
 
-.navBar{
+.navBar {
+    background-color: #101010;
     display: flex;
     min-height: 70px;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10%;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    padding: 0 20% 0;
+    z-index: 17;
+    transition: opacity 2s, top 0.3s ease-in-out;
+}
+
+.navBar-hidden{
+    opacity: 0;
+}
+
+.navBar-scroll {
+    top: -70px;
 }
 
 /* Links style */
@@ -55,6 +71,7 @@ body{
 
 /* central text decoretion and position */
 .hero{
+    margin-top: 182.5px;
     display: flex;
 }
 
@@ -151,7 +168,7 @@ body{
     display: grid;
     grid-template-columns: repeat(2,1fr);
     grid-template-rows: repeat(1,1fr);
-    gap: 75px;
+    gap: 100px;
 }
 
 .materialContainerText{
@@ -225,7 +242,7 @@ body{
 
 .materialContainerText p{
     position: absolute;
-    bottom: 0;
+    bottom: 50px;
     color: rgb(196, 193, 193);
     line-height: 30px;
     font-size: 1.2rem;
@@ -281,11 +298,7 @@ body{
     transition: all 1.5s;
     transform: translateY(50%);
     filter: blur(3px);
-}
-
-.navBar-hidden{
-    opacity: 0;
-    transition: all 2s;
+    transition: top 0.3s ease-in-out;
 }
 
 .show{
