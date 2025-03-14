@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full-Ring 3D Carousel - Responsive & Touch</title>
+  <style>
+    /* Contenitore principale */
+    .carousel-container {
+      width: 800px;
+      height: 400px;
+      margin: 50px auto;
+      perspective: 1000px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #ccc;
+    }
+    .carousel {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      user-select: none;
+      /* Aggiungo touch-action per evitare conflitti con lo scroll verticale */
+      touch-action: pan-y;
+    }
+    .card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      transform: translate(-50%, -50%);
+      /* Dimensioni e stile */
+      width: 240px;
+      height: 200px;
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      transition: transform 0.27s ease;
+    }
+    .buttons {
+      position: absolute;
+      width: 100%;
+      bottom: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      z-index: 10;
+    }
+    .buttons button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    
+    /* Responsive per dispositivi piccoli */
+    @media (max-width: 600px) {
+      .carousel-container {
+        width: 100%;
+        height: 300px;
+        margin: 20px auto;
+      }
+      .card {
+        width: 180px;
+        height: 150px;
+        font-size: 1rem;
+      }
+      .buttons button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="carousel-container">
+    <div class="carousel" id="carousel">
+      <!-- 8 card di esempio -->
+      <div class="card">1</div>
+      <div class="card">2</div>
+      <div class="card">3</div>
+      <div class="card">4</div>
+      <div class="card">5</div>
+      <div class="card">6</div>
+      <div class="card">7</div>
+      <div class="card">8</div>
+    </div>
+    <div class="buttons">
+      <button id="prevBtn">Prev</button>
+      <button id="nextBtn">Next</button>
+    </div>
+  </div>
+  
+  <script>
+    /*******************************************************
+     * VARIABILI E CONFIGURAZIONI
+     *******************************************************/
+    const carousel = document.getElementById('carousel');
+    const cards = carousel.querySelectorAll('.card');
+    const total = cards.length;
+    
+    // Calcola la larghezza effettiva della card e definisci un gap
+    let cardWidth = parseFloat(getComputedStyle(cards[0]).width);
+    let gap = 20;
+    let circumference = total * (cardWidth + gap);
+    let radius = circumference / (2 * Math.PI);
+    let angleStep = 360 / total;
+    
+    let currentIndex = 0;
+    let autoRotate = true;
+    // Rotazione: circa 1 scheda ogni 3 secondi (~1/480 per frame)
+    const rotationSpeed = 1 / 480;
+    
+    /*******************************************************
+     * POSIZIONAMENTO DELLE CARD
+     *******************************************************/
+    cards.forEach((card, i) => {
+      const cardAngle = i * angleStep;
+      card.style.transform = `translate(-50%, -50%) rotateY(${cardAngle}deg) translateZ(${radius}px)`;
+    });
+    
+    /*******************************************************
+     * FUNZIONE RENDER
+     *******************************************************/
+    function render() {
+      for (let i = 0; i < total; i++) {
+        const angle = (i - currentIndex) * angleStep;
+        cards[i].style.transform = `
+          translate(-50%, -50%)
+          rotateY(${angle}deg)
+          translateZ(${radius}px)
+        `;
+      }
+    }
+    
+    /*******************************************************
+     * ROTAZIONE AUTOMATICA CONTINUA
+     *******************************************************/
+    function animate() {
+      if (autoRotate) {
+        currentIndex += rotationSpeed;
+        render();
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+    
+    // Ferma l'auto-rotazione al click o drag/touch
+    function stopAutoRotate() {
+      autoRotate = false;
+    }
+    
+    /*******************************************************
+     * NAVIGAZIONE CON I PULSANTI
+     * Se la rotazione è attiva, il primo click blocca la scheda corrente,
+     * altrimenti i click cambiano scheda.
+     *******************************************************/
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    prevBtn.addEventListener('click', () => {
+      if (autoRotate) {
+        stopAutoRotate();
+        currentIndex = Math.round(currentIndex);
+      } else {
+        currentIndex = Math.round(currentIndex) - 1;
+      }
+      render();
+    });
+    
+    nextBtn.addEventListener('click', () => {
+      if (autoRotate) {
+        stopAutoRotate();
+        currentIndex = Math.round(currentIndex);
+      } else {
+        currentIndex = Math.round(currentIndex) + 1;
+      }
+      render();
+    });
+    
+    /*******************************************************
+     * TRASCINAMENTO (DRAG) CON IL MOUSE
+     * Sensibilità ridotta (fattore 0.005)
+     *******************************************************/
+    let isDragging = false;
+    let startX = 0;
+    let startIndex = 0;
+    
+    carousel.addEventListener('mousedown', (e) => {
+      stopAutoRotate();
+      isDragging = true;
+      startX = e.clientX;
+      startIndex = currentIndex;
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const delta = e.clientX - startX;
+      const indexOffset = delta * 0.005;
+      currentIndex = startIndex - indexOffset;
+      render();
+    });
+    
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      currentIndex = Math.round(currentIndex);
+      render();
+    });
+    
+    /*******************************************************
+     * TRASCINAMENTO (SWIPE) CON IL TOUCH
+     *******************************************************/
+    carousel.addEventListener('touchstart', (e) => {
+      stopAutoRotate();
+      isDragging = true;
+      startX = e.touches[0].clientX;
+      startIndex = currentIndex;
+    });
+    
+    carousel.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const delta = e.touches[0].clientX - startX;
+      const indexOffset = delta * 0.005;
+      currentIndex = startIndex - indexOffset;
+      render();
+      // Impedisci lo scroll verticale se necessario
+      e.preventDefault();
+    }, { passive: false });
+    
+    carousel.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      currentIndex = Math.round(currentIndex);
+      render();
+    });
+    
+    // Primo render per posizionare le card all'avvio
+    render();
+  </script>
+</body>
+</html>
