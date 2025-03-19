@@ -2,219 +2,71 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Full-Ring 3D Carousel - Responsive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Navbar con Flexbox e Sticky</title>
   <style>
-    /* Container principale */
-    .carousel-container {
-      width: 800px;
-      height: 400px;
-      margin: 50px auto;
-      perspective: 1000px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid #ccc;
+    body {
+      margin: 0;
     }
-    .carousel {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      user-select: none;
+    /* Contenitore della navbar, posizionato sticky */
+    .navbar-container {
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+      transition: transform 0.3s; /* Transizione per l'effetto */
     }
-    .card {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
-      transform: translate(-50%, -50%);
-      /* Dimensioni e stile */
-      width: 240px;
-      height: 200px;
-      background: #f4f4f4;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    /* Navbar con Flexbox */
+    .navbar {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-      transition: transform 0.27s ease;
+      background-color: #333;
+      color: #fff;
+      padding: 15px;
     }
-    .buttons {
-      position: absolute;
-      width: 100%;
-      bottom: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      z-index: 10;
+    /* Classe che trasforma la navbar verso l'alto */
+    .navbar-container.hidden {
+      transform: translateY(-100%);
     }
-    .buttons button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    
-    /* Media Query per schermi piccoli */
-    @media (max-width: 600px) {
-      .carousel-container {
-        width: 100%;
-        height: 300px;
-        margin: 20px auto;
-      }
-      .card {
-        width: 180px;
-        height: 150px;
-        font-size: 1rem;
-      }
-      .buttons button {
-        padding: 8px 16px;
-        font-size: 0.9rem;
-      }
+    /* Contenuto di esempio per rendere scrollabile la pagina */
+    .content {
+      height: 2000px;
+      padding: 20px;
+      background: linear-gradient(#f5f5f5, #ddd);
     }
   </style>
 </head>
 <body>
-  <div class="carousel-container">
-    <div class="carousel" id="carousel">
-      <!-- 8 card di esempio -->
-      <div class="card">1</div>
-      <div class="card">2</div>
-      <div class="card">3</div>
-      <div class="card">4</div>
-      <div class="card">5</div>
-      <div class="card">6</div>
-      <div class="card">7</div>
-      <div class="card">8</div>
-    </div>
-    <div class="buttons">
-      <button id="prevBtn">Prev</button>
-      <button id="nextBtn">Next</button>
-    </div>
+
+  <div class="navbar-container" id="navbarContainer">
+    <nav class="navbar">
+      <div>Logo</div>
+      <div>Menu</div>
+    </nav>
   </div>
-  
+
+  <div class="content">
+    <h1>Contenuto della pagina</h1>
+    <p>Scorri la pagina per vedere l'effetto della navbar.</p>
+  </div>
+
   <script>
-    /*******************************************************
-     * VARIABILI E CONFIGURAZIONI
-     *******************************************************/
-    const carousel = document.getElementById('carousel');
-    const cards = carousel.querySelectorAll('.card');
-    const total = cards.length;
-    
-    // Calcola la larghezza effettiva di una card
-    let cardWidth = parseFloat(getComputedStyle(cards[0]).width);
-    let gap = 20;
-    let circumference = total * (cardWidth + gap);
-    let radius = circumference / (2 * Math.PI);
-    let angleStep = 360 / total;
-    
-    let currentIndex = 0;
-    let autoRotate = true;
-    // Rotazione: circa 1 scheda ogni 3 secondi (~1/480 per frame)
-    const rotationSpeed = 1 / 480;
-    
-    /*******************************************************
-     * POSIZIONAMENTO DELLE CARD
-     *******************************************************/
-    cards.forEach((card, i) => {
-      const cardAngle = i * angleStep;
-      card.style.transform = `translate(-50%, -50%) rotateY(${cardAngle}deg) translateZ(${radius}px)`;
-    });
-    
-    /*******************************************************
-     * FUNZIONE RENDER
-     *******************************************************/
-    function render() {
-      for (let i = 0; i < total; i++) {
-        const angle = (i - currentIndex) * angleStep;
-        cards[i].style.transform = `
-          translate(-50%, -50%)
-          rotateY(${angle}deg)
-          translateZ(${radius}px)
-        `;
-      }
-    }
-    
-    /*******************************************************
-     * ROTAZIONE AUTOMATICA CONTINUA
-     *******************************************************/
-    function animate() {
-      if (autoRotate) {
-        currentIndex += rotationSpeed;
-        render();
-      }
-      requestAnimationFrame(animate);
-    }
-    animate();
-    
-    // Ferma l'auto-rotazione al click o drag
-    function stopAutoRotate() {
-      autoRotate = false;
-    }
-    
-    /*******************************************************
-     * NAVIGAZIONE CON I PULSANTI
-     * Se la rotazione è attiva, il primo click blocca la scheda corrente,
-     * altrimenti i click cambiano scheda.
-     *******************************************************/
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    
-    prevBtn.addEventListener('click', () => {
-      if (autoRotate) {
-        stopAutoRotate();
-        currentIndex = Math.round(currentIndex);
+    let prevScrollPos = window.pageYOffset;
+    const navbarContainer = document.getElementById('navbarContainer');
+
+    window.addEventListener('scroll', function() {
+      const currentScrollPos = window.pageYOffset;
+      
+      // Se si scrolla verso l'alto, rimuovo la classe che nasconde la navbar
+      if (prevScrollPos > currentScrollPos) {
+        navbarContainer.classList.remove('hidden');
       } else {
-        currentIndex = Math.round(currentIndex) - 1;
+        // Se si scrolla verso il basso, aggiungo la classe per nasconderla
+        navbarContainer.classList.add('hidden');
       }
-      render();
+      prevScrollPos = currentScrollPos;
     });
-    
-    nextBtn.addEventListener('click', () => {
-      if (autoRotate) {
-        stopAutoRotate();
-        currentIndex = Math.round(currentIndex);
-      } else {
-        currentIndex = Math.round(currentIndex) + 1;
-      }
-      render();
-    });
-    
-    /*******************************************************
-     * TRASCINAMENTO CON IL MOUSE (DRAG)
-     * Sensibilità ridotta (fattore 0.005)
-     *******************************************************/
-    let isDragging = false;
-    let startX = 0;
-    let startIndex = 0;
-    
-    carousel.addEventListener('mousedown', (e) => {
-      stopAutoRotate();
-      isDragging = true;
-      startX = e.clientX;
-      startIndex = currentIndex;
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const delta = e.clientX - startX;
-      const indexOffset = delta * 0.005;
-      currentIndex = startIndex - indexOffset;
-      render();
-    });
-    
-    document.addEventListener('mouseup', () => {
-      if (!isDragging) return;
-      isDragging = false;
-      currentIndex = Math.round(currentIndex);
-      render();
-    });
-    
-    // Primo render
-    render();
   </script>
+
 </body>
 </html>
